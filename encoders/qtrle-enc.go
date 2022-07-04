@@ -121,6 +121,9 @@ func (enc *QTRLEImageEncoder) Close() {
 	logger.Info("--- closing qtrle")
 	enc.closed = true
 	if enc.cmd != nil && enc.cmd.Process != nil {
-		enc.cmd.Process.Signal(syscall.SIGTERM)
+		enc.cmd.Process.Signal(syscall.SIGABRT)
+	}
+	if enc.input != nil {
+		enc.input.Close()
 	}
 }
