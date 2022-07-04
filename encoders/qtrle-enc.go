@@ -2,11 +2,14 @@ package encoders
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
+
 	"github.com/amitbet/vnc2video/logger"
 )
 
@@ -20,6 +23,7 @@ type QTRLEImageEncoder struct {
 }
 
 func (enc *QTRLEImageEncoder) Init(videoFileName string) {
+	logger.Info("--- kajafon --- ")
 	fileExt := ".mov"
 	if enc.Framerate == 0 {
 		enc.Framerate = 12
@@ -32,7 +36,7 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 		"-f", "image2pipe",
 		"-vcodec", "ppm",
 		//"-r", strconv.Itoa(framerate),
-		"-r", "12",
+		"-r", fmt.Sprint(enc.Framerate),
 
 		//"-re",
 		//"-i", "pipe:0",
@@ -73,8 +77,8 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 	//cmd := exec.Command("/bin/echo")
 
 	//io.Copy(cmd.Stdout, os.Stdout)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// cmd.Stdout = os.Stdout
+	// cmd.Stderr = os.Stderr
 
 	encInput, err := cmd.StdinPipe()
 	enc.input = encInput
@@ -115,5 +119,7 @@ func (enc *QTRLEImageEncoder) Encode(img image.Image) {
 
 func (enc *QTRLEImageEncoder) Close() {
 	enc.closed = true
-	//enc.cmd.Process.Kill()
+	if enc.cmd != nil && enc.cmd.Process != nil {
+		enc.cmd.Process.Signal(syscall.SIGTERM)
+	}
 }
