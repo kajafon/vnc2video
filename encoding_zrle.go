@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"image/draw"
 	"io"
+
 	"github.com/amitbet/vnc2video/logger"
 )
 
@@ -43,7 +44,7 @@ func (enc *ZRLEEncoding) Write(c Conn, rect *Rectangle) error {
 func IsCPixelSpecific(pf *PixelFormat) bool {
 	significant := int(pf.RedMax<<pf.RedShift | pf.GreenMax<<pf.GreenShift | pf.BlueMax<<pf.BlueShift)
 
-	if pf.Depth <= 24 && 32 == pf.BPP && ((significant&0x00ff000000) == 0 || (significant&0x000000ff) == 0) {
+	if pf.Depth <= 24 && pf.BPP == 32 && ((int64(significant)&int64(0x00ff000000)) == 0 || (significant&0x000000ff) == 0) {
 		return true
 	}
 	return false
