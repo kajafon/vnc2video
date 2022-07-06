@@ -382,6 +382,7 @@ func (enc *TightEncoding) drawTightPalette(rect *Rectangle, palette color.Palett
 				bytePos++
 			}
 			//palettePos = palettePos
+			palettePos %= len(palette)
 			enc.Image.Set(int(rect.X)+x, int(rect.Y)+y, palette[palettePos])
 			//logger.Tracef("(%d,%d): pos: %d col:%d", int(rect.X)+j, int(rect.Y)+i, palettePos, palette[palettePos])
 		}
