@@ -21,7 +21,6 @@ type QTRLEImageEncoder struct {
 }
 
 func (enc *QTRLEImageEncoder) Init(videoFileName string) {
-	logger.Info("--- kajafon --- ")
 	fileExt := ".mov"
 	if enc.Framerate == 0 {
 		enc.Framerate = 12
@@ -48,13 +47,13 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 		"-vcodec", "qtrle", //"libvpx",//"libvpx-vp9"//"libx264"
 		//"-b:v", "0.33M",
 		"-threads", "7",
+		"-preset", "veryfast",
 		///"-coder", "1",
 		///"-bf", "0",
 		///"-me_method", "hex",
 		//"-speed", "0",
 		//"-lossless", "1", //for vpx
 		// "-an", "-f", "webm",
-		"-preset", "veryfast",
 		//"-tune", "animation",
 		"-maxrate", "0.5M",
 		"-bufsize", "50M",
@@ -116,7 +115,6 @@ func (enc *QTRLEImageEncoder) Encode(img image.Image) {
 }
 
 func (enc *QTRLEImageEncoder) Close() {
-	logger.Info("--- closing qtrle")
 	enc.closed = true
 	if enc.cmd != nil && enc.cmd.Process != nil {
 		enc.cmd.Process.Signal(syscall.SIGABRT)
