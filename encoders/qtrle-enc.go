@@ -44,7 +44,7 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 		"-y",
 
 		"-i", "-",
-		//"–s", "640×360",
+		"–s", "640×360",
 		"-vcodec", "qtrle", //"libvpx",//"libvpx-vp9"//"libx264"
 		//"-b:v", "0.33M",
 		"-threads", "7",
