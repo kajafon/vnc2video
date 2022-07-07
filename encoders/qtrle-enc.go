@@ -104,15 +104,16 @@ func (enc *QTRLEImageEncoder) Run(videoFileName string) error {
 	}
 	return nil
 }
-func (enc *QTRLEImageEncoder) Encode(img image.Image) {
+func (enc *QTRLEImageEncoder) Encode(img image.Image) error {
 	if enc.input == nil || enc.closed {
-		return
+		return nil
 	}
 
 	err := encodePPM(enc.input, img)
 	if err != nil {
 		logger.Error("error while encoding image:", err)
 	}
+	return err
 }
 
 func (enc *QTRLEImageEncoder) Close() {
