@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -42,7 +43,7 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 		///"-probesize", "10000000",
 		"-y",
 
-		// "-i", "-",
+		"-i", "-",
 		//"–s", "640×360",
 		"-vcodec", "qtrle", //"libvpx",//"libvpx-vp9"//"libx264"
 		//"-b:v", "0.33M",
@@ -74,8 +75,8 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 	//cmd := exec.Command("/bin/echo")
 
 	//io.Copy(cmd.Stdout, os.Stdout)
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	encInput, err := cmd.StdinPipe()
 	enc.input = encInput
