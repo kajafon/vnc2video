@@ -42,7 +42,7 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 		///"-probesize", "10000000",
 		"-y",
 
-		"-i", "-",
+		// "-i", "-",
 		//"–s", "640×360",
 		"-vcodec", "qtrle", //"libvpx",//"libvpx-vp9"//"libx264"
 		//"-b:v", "0.33M",
