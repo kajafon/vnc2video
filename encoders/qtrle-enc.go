@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 
 	"github.com/amitbet/vnc2video/logger"
 )
@@ -21,7 +20,7 @@ type QTRLEImageEncoder struct {
 	Framerate     int
 }
 
-func (enc *QTRLEImageEncoder) Init(videoFileName string) {
+func (enc *QTRLEImageEncoder) Init(videoFileName string, output io.Writer) {
 	fileExt := ".mov"
 	if enc.Framerate == 0 {
 		enc.Framerate = 12
@@ -44,7 +43,7 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 		"-y",
 
 		"-i", "-",
-		"–s", "640×360",
+		// "–size", "1920x1080",
 		"-vcodec", "qtrle", //"libvpx",//"libvpx-vp9"//"libx264"
 		//"-b:v", "0.33M",
 		"-threads", "7",
@@ -75,8 +74,13 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 	//cmd := exec.Command("/bin/echo")
 
 	//io.Copy(cmd.Stdout, os.Stdout)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if output != nil {
+		cmd.Stdout = output //os.Stdout
+		cmd.Stderr = output // os.Stderr
+	} else {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 
 	encInput, err := cmd.StdinPipe()
 	enc.input = encInput
@@ -85,7 +89,7 @@ func (enc *QTRLEImageEncoder) Init(videoFileName string) {
 	}
 	enc.cmd = cmd
 }
-func (enc *QTRLEImageEncoder) Run(videoFileName string) error {
+func (enc *QTRLEImageEncoder) Run(videoFileName string, output io.Writer) error {
 	// if _, err := os.Stat(enc.FFMpegBinPath); os.IsNotExist(err) {
 	// 	if _, err := os.Stat(enc.FFMpegBinPath + ".exe"); os.IsNotExist(err) {
 	// 		logger.Error("encoder file doesn't exist in path:", enc.FFMpegBinPath)
@@ -95,7 +99,7 @@ func (enc *QTRLEImageEncoder) Run(videoFileName string) error {
 	// 	}
 	// }
 
-	enc.Init(videoFileName)
+	enc.Init(videoFileName, output)
 	logger.Debugf("launching binary: %v", enc.cmd)
 	err := enc.cmd.Run()
 	if err != nil {
@@ -119,7 +123,7 @@ func (enc *QTRLEImageEncoder) Encode(img image.Image) error {
 func (enc *QTRLEImageEncoder) Close() {
 	enc.closed = true
 	if enc.cmd != nil && enc.cmd.Process != nil {
-		enc.cmd.Process.Signal(syscall.SIGABRT)
+		enc.cmd.Process.Signal(os.Interrupt)
 	}
 	if enc.input != nil {
 		enc.input.Close()

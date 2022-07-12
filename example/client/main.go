@@ -10,6 +10,7 @@ import (
 	"runtime/pprof"
 	"syscall"
 	"time"
+
 	vnc "github.com/amitbet/vnc2video"
 	"github.com/amitbet/vnc2video/encoders"
 	"github.com/amitbet/vnc2video/logger"
@@ -77,7 +78,7 @@ func main() {
 	//counter := 0
 	//vcodec.Init("./output" + strconv.Itoa(counter))
 
-	go vcodec.Run("./output.mp4")
+	go vcodec.Run("./output.mp4", nil)
 	//windows
 	///go vcodec.Run("/Users/amitbet/Dropbox/go/src/vnc2webm/example/file-reader/ffmpeg", "./output.mp4")
 
