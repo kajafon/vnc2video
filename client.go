@@ -292,10 +292,15 @@ func (*DefaultClientMessageHandler) Handle(c Conn) error {
 
 	panicHandler := func() {
 		if e := recover(); e != nil {
+			logger.Error("vnc2video: Handler paniced and will quit: ")
+			c.Close()
+
 			switch err := e.(type) {
 			case error:
+				logger.Error(e)
 				c.OnFatalError(err)
 			default:
+				logger.Error(e)
 				c.OnFatalError(errors.New("unknown error"))
 			}
 		}
