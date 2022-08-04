@@ -34,6 +34,11 @@ type SimpleLogger struct {
 	level LogLevel
 }
 
+func SetLogLevel(logLevel LogLevel) {
+	fmt.Println("Log level set to: ", logLevel)
+	simpleLogger = SimpleLogger{logLevel}
+}
+
 func (sl *SimpleLogger) Trace(v ...interface{}) {
 	if sl.level <= LogLevelTrace {
 		arr := []interface{}{"[Trace]"}
