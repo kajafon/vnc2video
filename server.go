@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net"
 	"sync"
+
+	"github.com/amitbet/vnc2video/logger"
 )
 
 var _ Conn = (*ServerConn)(nil)
@@ -22,6 +24,19 @@ func (c *ServerConn) GetEncInstance(typ EncodingType) Encoding {
 		}
 	}
 	return nil
+}
+
+func (c *ServerConn) IsConnected() bool {
+	logger.Error("func (c *ServerConn) IsConnected() bool not implemented ")
+	return false
+}
+
+func (c *ServerConn) OnFatalError(error) {
+	logger.Error("func (c *ServerConn) OnFatalError(error) bool not implemented ")
+}
+
+func (c *ServerConn) AddErrorHandler(h func(error)) {
+	logger.Error("func (c *ServerConn) AddErrorHandler(h func(error)) bool not implemented ")
 }
 
 // Conn returns underlining server net.Conn

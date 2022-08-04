@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
+
 	"github.com/amitbet/vnc2video/logger"
 )
 
@@ -105,6 +107,7 @@ func (c *ClientConn) Close() error {
 	if c.quitCh != nil {
 		close(c.quitCh)
 	}
+	c.IsConnencted = false
 	return c.c.Close()
 }
 
@@ -223,9 +226,26 @@ type ClientConn struct {
 	// SetPixelFormat method.
 	pixelFormat PixelFormat
 
-	quitCh  chan struct{}
-	quit    chan struct{}
-	errorCh chan error
+	quitCh       chan struct{}
+	quit         chan struct{}
+	errorCh      chan error
+	IsConnencted bool
+
+	errorHandlers []func(error)
+}
+
+func (cc *ClientConn) AddErrorHandler(h func(error)) {
+	cc.errorHandlers = append(cc.errorHandlers, h)
+}
+
+func (cc *ClientConn) OnFatalError(err error) {
+	for _, h := range cc.errorHandlers {
+		h(err)
+	}
+}
+
+func (cc *ClientConn) IsConnected() bool {
+	return cc.IsConnencted
 }
 
 func (cc *ClientConn) ResetAllEncodings() {
@@ -240,15 +260,16 @@ func NewClientConn(c net.Conn, cfg *ClientConfig) (*ClientConn, error) {
 		return nil, fmt.Errorf("client can't handle encodings")
 	}
 	return &ClientConn{
-		c:           c,
-		cfg:         cfg,
-		br:          bufio.NewReader(c),
-		bw:          bufio.NewWriter(c),
-		encodings:   cfg.Encodings,
-		quitCh:      cfg.QuitCh,
-		errorCh:     cfg.ErrorCh,
-		pixelFormat: cfg.PixelFormat,
-		quit:        make(chan struct{}),
+		c:            c,
+		cfg:          cfg,
+		br:           bufio.NewReader(c),
+		bw:           bufio.NewWriter(c),
+		encodings:    cfg.Encodings,
+		quitCh:       cfg.QuitCh,
+		errorCh:      cfg.ErrorCh,
+		pixelFormat:  cfg.PixelFormat,
+		quit:         make(chan struct{}),
+		IsConnencted: true,
 	}, nil
 }
 
@@ -269,9 +290,21 @@ func (*DefaultClientMessageHandler) Handle(c Conn) error {
 		serverMessages[m.Type()] = m
 	}
 
+	panicHandler := func() {
+		if e := recover(); e != nil {
+			switch err := e.(type) {
+			case error:
+				c.OnFatalError(err)
+			default:
+				c.OnFatalError(errors.New("unknown error"))
+			}
+		}
+	}
+
 	go func() {
 		defer wg.Done()
-		for {
+		defer panicHandler()
+		for c.IsConnected() {
 			select {
 			case msg := <-cfg.ClientMessageCh:
 				if err = msg.Write(c); err != nil {
@@ -284,7 +317,9 @@ func (*DefaultClientMessageHandler) Handle(c Conn) error {
 
 	go func() {
 		defer wg.Done()
-		for {
+		defer panicHandler()
+
+		for c.IsConnected() {
 			select {
 			default:
 				var messageType ServerMessageType
@@ -313,6 +348,7 @@ func (*DefaultClientMessageHandler) Handle(c Conn) error {
 				cfg.ServerMessageCh <- parsedMsg
 			}
 		}
+		logger.Info("(*DefaultClientMessageHandler) Handle() ---- EXIT go routine")
 	}()
 	//encodings := c.Encodings()
 	encTypes := make(map[EncodingType]EncodingType)

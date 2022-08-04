@@ -29,4 +29,7 @@ type Conn interface {
 	SetSecurityHandler(SecurityHandler) error
 	SecurityHandler() SecurityHandler
 	GetEncInstance(EncodingType) Encoding
+	IsConnected() bool
+	OnFatalError(error)
+	AddErrorHandler(h func(error))
 }

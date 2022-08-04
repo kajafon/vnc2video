@@ -3,6 +3,7 @@ package vnc2video
 import (
 	"encoding/binary"
 	"net"
+
 	"github.com/amitbet/vnc2video/logger"
 
 	"io"
@@ -43,7 +44,7 @@ type FbsConn struct {
 // 	return c.fbs.Read(buf)
 // }
 
-//dummy, no writing to this conn...
+// dummy, no writing to this conn...
 func (c *FbsConn) Write(buf []byte) (int, error) {
 	return len(buf), nil
 }
@@ -90,6 +91,17 @@ func (c *FbsConn) GetEncInstance(typ EncodingType) Encoding {
 		}
 	}
 	return nil
+}
+func (c *FbsConn) IsConnected() bool {
+	logger.Error("(c *FbsConn) IsConnected() bool not implemented")
+	return false
+}
+
+func (c *FbsConn) OnFatalError(error) {
+	logger.Error("(c *FbsConn) OnFatalError(error) not implemented")
+}
+func (c *FbsConn) AddErrorHandler(h func(error)) {
+	logger.Error("(c *FbsConn) AddErrorHandler(h func(error)) not implemented")
 }
 
 type VncStreamFileReader interface {
