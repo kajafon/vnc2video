@@ -300,8 +300,9 @@ func (*DefaultClientMessageHandler) Handle(c Conn) error {
 				logger.Error(e)
 				c.OnFatalError(err)
 			default:
-				logger.Error(e)
-				c.OnFatalError(errors.New("unknown error"))
+				msg := fmt.Sprint(e)
+				logger.Error(msg)
+				c.OnFatalError(errors.New(msg))
 			}
 		}
 	}
